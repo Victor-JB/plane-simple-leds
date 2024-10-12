@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import requests
 from datetime import datetime, timedelta
 import traceback
+import json
 
 load_dotenv()
 
@@ -17,7 +18,7 @@ PLANE_API_KEY = os.getenv('PLANE_API_KEY')
 
 # consts
 format_string = '%Y-%m-%dT%H:%M:%S'
-iata_code = "LAX"
+iata_code = "SJC"
 
 # all flights arriving a SJC API endpoint
 all_flights_url = f"https://aviation-edge.com/v2/public/timetable?key={PLANE_API_KEY}&iataCode={iata_code}&type=arrival&status=active"
@@ -26,14 +27,17 @@ all_flights_url = f"https://aviation-edge.com/v2/public/timetable?key={PLANE_API
 sing_flight_url = f"https://aviation-edge.com/v2/public/flights?key={PLANE_API_KEY}&flightIata="
 
 # ---------------------------------------------------------------------------- #
+""" Gets all active flights arriving to SJC on IFR plan; i.e, jets """
 def return_flights_queue():
     # A GET request to the API
     arr_dict_list = requests.get(all_flights_url).json()
+    print(json.dumps(arr_dict_list, indent=4))
 
     arrival_queue = []
     for arrival in arr_dict_list:
+        print(json.dumps(arrival, indent=4))
         arr_time = arrival['arrival']['estimatedTime'].split(".")[0] # raw string arrival time
-        arr_datetime = datetime.strptime(arr_time, format_string)
+        arr_datetime = datetime.strptime(arr_time, format_string) # formatting str into datetime obj
 
         if datetime.now() < arr_datetime and arrival['flight']['iataNumber']:
             arrival_queue.append({"est_time": arr_datetime, "flight": arrival['flight']})
@@ -43,7 +47,8 @@ def return_flights_queue():
     return arrival_queue
 
 # ---------------------------------------------------------------------------- #
-def get_plane_alt(iata_number):
+""" Gets specific flight info for a specific flight we want to monitor """
+def get_plane_info(iata_number):
     # A GET request to the API
     # print(sing_flight_url + iata_number)
     flight_info = requests.get(sing_flight_url + iata_number)
@@ -57,8 +62,10 @@ def get_plane_alt(iata_number):
 # ---------------------------------------------------------------------------- #
 flight_queue = return_flights_queue()
 
-print(flight_queue)
+print(flight_queue, "\n")
+
 print()
 
-
-print(get_plane_alt(flight_queue[0]['flight']['iataNumber']))
+single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
+while !single_flight:
+    single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
