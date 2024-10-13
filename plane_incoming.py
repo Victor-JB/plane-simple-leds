@@ -6,8 +6,8 @@
     Date: Fall 2024
 """
 import os
-from dotenv import load_dotenv
-import requests
+from dotenv import load_dotenv # type: ignore
+import requests # type: ignore
 from datetime import datetime, timedelta
 import traceback
 import json
