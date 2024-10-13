@@ -1,3 +1,8 @@
+
+"""
+Flask app to host API + simple interface for toggling api & lights running
+"""
+
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 

@@ -67,5 +67,5 @@ print(flight_queue, "\n")
 print()
 
 single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
-while !single_flight:
-    single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
+# while !single_flight:
+    # single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
