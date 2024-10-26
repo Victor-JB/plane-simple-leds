@@ -16,6 +16,8 @@ load_dotenv()
 
 PLANE_API_KEY = os.getenv('PLANE_API_KEY')
 
+print(PLANE_API_KEY)
+
 # consts
 format_string = '%Y-%m-%dT%H:%M:%S'
 iata_code = "SJC"
@@ -30,8 +32,10 @@ sing_flight_url = f"https://aviation-edge.com/v2/public/flights?key={PLANE_API_K
 """ Gets all active flights arriving to SJC on IFR plan; i.e, jets """
 def return_flights_queue():
     # A GET request to the API
+    print("requesting from api")
     arr_dict_list = requests.get(all_flights_url).json()
-    print(json.dumps(arr_dict_list, indent=4))
+    print("RESPONSE FROM THE THING:", json.dumps(arr_dict_list, indent=4))
+
 
     arrival_queue = []
     for arrival in arr_dict_list:
@@ -49,23 +53,33 @@ def return_flights_queue():
 # ---------------------------------------------------------------------------- #
 """ Gets specific flight info for a specific flight we want to monitor """
 def get_plane_info(iata_number):
-    # A GET request to the API
-    # print(sing_flight_url + iata_number)
-    flight_info = requests.get(sing_flight_url + iata_number)
     try:
-        flight_info = flight_info.json()
-        return flight_info
+        flight_info = requests.get(sing_flight_url + iata_number).json()
+        print(f"Flight Info for {iata_number}:", json.dumps(flight_info, indent=4))
+
+        # Extract altitude from flight data
+        altitude = flight_info[0]['geography']['altitude']
+        if altitude is not None:
+            print(f"Altitude for flight {iata_number}: {altitude} meters")
+        else:
+            print(f"No altitude data available for flight {iata_number}")
+
+        return altitude
+
     except Exception:
-        print(traceback.format_exc())
+        print("Error fetching plane info:", traceback.format_exc())
         return None
 
 # ---------------------------------------------------------------------------- #
+# Fetch and display the flight queue
 flight_queue = return_flights_queue()
+#print(f"Flight Queue: {flight_queue}\n")
 
-print(flight_queue, "\n")
-
-print()
-
-single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
-# while !single_flight:
-    # single_flight = get_plane_info(flight_queue[0]['flight']['iataNumber'])
+# Check if the flight queue is not empty before querying flight info
+if flight_queue:
+    first_flight_iata = flight_queue[0]['flight']['iataNumber']
+    altitude = get_plane_info(first_flight_iata)
+    print(f"First Flight Iata: {first_flight_iata}")
+    print(f"Altitude of the first flight in the queue: {altitude} meters")
+else:
+    print("No flights in the queue.")
